@@ -1,9 +1,13 @@
 import os
 import csv
+import platform
 from collections import Counter
 
 # data set dir
-root_dir = '/Users/lee/Desktop/大四/毕业设计/GP_data'
+if platform.system() == "Darwin":
+    root_dir = '/Users/lee/Desktop/大四/毕业设计/GP_data'
+elif platform.system() == "Linux":
+    root_dir = '/home/lee/Desktop/GP'
 ndpi_label_filename = 'ndpi_result.txt'
 single_packet_length = 1500
 
