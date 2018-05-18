@@ -9,11 +9,21 @@ Project: https://github.com/aymericdamien/TensorFlow-Examples/
 from __future__ import division, print_function, absolute_import
 
 import tensorflow as tf
+import train_test
+import os
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
-# Import MNIST data
-from tensorflow.examples.tutorials.mnist import input_data
+train_set = pd.read_csv(os.path.join(train_test.data_set_root, 'handled_train.csv'),
+                        index_col=0, header=0)
+labels_set = pd.read_csv(os.path.join(train_test.data_set_root, 'handled_labels.csv'),
+                        index_col=0, header=None)
 
-mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
+train_set = train_set.values
+
+print(train_set)
+
+X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
 # Training Parameters
 learning_rate = 0.001

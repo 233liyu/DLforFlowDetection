@@ -1,17 +1,19 @@
-import tensorflow as tf
+# import tensorflow as tf
 
-hello = tf.constant('Hello, TensorFlow!')
-sess = tf.Session()
-print(sess.run(hello))
+# hello = tf.constant('Hello, TensorFlow!')
+# sess = tf.Session()
+# print(sess.run(hello))
 
 import pandas as pd
 import numpy as np
+import re
 #
 # df1 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3', 'A1', 'A1', 'A3'],
 #                     'B': ['B0', 'B1', 'B2', 'B3', 'B6', 'B9', 'B10']})
 #
-# df3 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
-#                     'C': ['C8', 'C9', 'C10', 'C11']})
+df3 = pd.DataFrame({'A': ['A0', 'A1', 'A2', 'A3'],
+                    'C': ['C8', 'C9', 'C10', 'C11']})
+print(df3.applymap(lambda x : int(x, 16)))
 #
 # result = pd.merge(df1, df3, on='A')
 #
@@ -23,35 +25,15 @@ import numpy as np
 # d = pd.DataFrame([stri], columns=['one'])
 # print(d)
 
-df = pd.DataFrame({'A': ['40', '00', '0a', '3e', '25', 'a6', 'fa', '5d', '29', '10'],
-                   'B': ['41', '00', '0a', '3e', '25', 'a6', 'fa', '5d', '29', '10']})
+def to_full_str(x):
+    x = str(x)
+    x = ('{:0<%d}' % int(50)).format(x)
+    b = []
+    l = len(x)
+    for n in range(l):
+        if n % 2 == 0:
+            b.append(x[n:n+2])
+    return '_'.join(b)
 
-dfx=pd.DataFrame()
-
-li1=[]
-for i in df:
-    n = 0
-    q='s'+n.__str__()
-    li1.append(q)
-
-
-print(li1)
-
-for i in df:
-    n = 0
-    # print(df[i])
-    li=[]
-    for j in df[i]:
-        # df[i][j]=int(j,16)
-        li.append({q:int(j,16)})
-
-    print(li)
-
-    dfx.append(dict(zip()), ignore_index=True)
-
-print(dfx)
-# print(df.A['40'])
-# df2 = df.apply(lambda x: int(x, 16), axis=1)
-# print(df2)
-
-# print(int('0a', 16))
+a = '12oihcds09a8yft023grb08hb0dsw8hrf'
+print(to_full_str(a))
