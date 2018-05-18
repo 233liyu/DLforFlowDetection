@@ -123,6 +123,7 @@ for sub_dir in sub_dir_list():
 
             if (ms_p, app_p) not in pro_result:
                 pro_result.append((ms_p, app_p))
+                print("add new protocol: ", (ms_p, app_p))
             for (ms_p, app_p) in pro_result:
                 count_result[(ms_p, app_p)] += 1
         else:
