@@ -9,7 +9,7 @@ if platform.system() == "Darwin":
 elif platform.system() == "Linux":
     root_dir = '/home/lee/Desktop/GP'
 ndpi_label_filename = 'ndpi_result.txt'
-single_packet_length = 1500
+single_packet_length = 1568
 
 
 # return sub dirs in the root dic
@@ -20,7 +20,7 @@ def sub_dir_list():
 
 
 # read from the raw data file and return a joint payload
-# @return: [return payload, payload_length, process, success]
+# @return: [return payload, payload_length, process, success]\
 def read_raw_data(file_name):
     payload = ""
     process = "NULL"
@@ -99,45 +99,46 @@ def write_date_ndpi_to_csv(date, ndpi_result_list):
             writer.writerow((str(date + ':' + flow_name), ms_pro, app_pro, process))
 
 
-print("start to format data")
-for sub_dir in sub_dir_list():
-    print("entering dir: ", sub_dir)
-    file_dir = os.path.join(root_dir, sub_dir)
-    ndpi_file = os.path.join(file_dir, ndpi_label_filename)
-    ndpi_result = read_ndpi_result(ndpi_file)
+if __name__ == '__main__':
+    print("start to format data")
+    for sub_dir in sub_dir_list():
+        print("entering dir: ", sub_dir)
+        file_dir = os.path.join(root_dir, sub_dir)
+        ndpi_file = os.path.join(file_dir, ndpi_label_filename)
+        ndpi_result = read_ndpi_result(ndpi_file)
 
-    error_file = []
-    com_result = []
-    pro_result = []
-    count_result = Counter()
+        error_file = []
+        com_result = []
+        pro_result = []
+        count_result = Counter()
 
-    payload_length = 0
-    packet_count = 0
-    for flow, ms_p, app_p in ndpi_result:
-        loads, process_name, count, result = read_raw_data(os.path.join(file_dir, flow))
-        if result:
-            write_payload_to_csv(sub_dir, flow, loads)
-            payload_length += len(loads)
-            packet_count += count
-            com_result.append((flow, ms_p, app_p, process_name))
+        payload_length = 0
+        packet_count = 0
+        for flow, ms_p, app_p in ndpi_result:
+            loads, process_name, count, result = read_raw_data(os.path.join(file_dir, flow))
+            if result:
+                write_payload_to_csv(sub_dir, flow, loads)
+                payload_length += len(loads)
+                packet_count += count
+                com_result.append((flow, ms_p, app_p, process_name))
 
-            if (ms_p, app_p) not in pro_result:
-                pro_result.append((ms_p, app_p))
-                print("add new protocol: ", (ms_p, app_p))
-            for (ms_p, app_p) in pro_result:
-                count_result[(ms_p, app_p)] += 1
-        else:
-            # mark the file-missing item
-            error_file.append(flow)
+                if (ms_p, app_p) not in pro_result:
+                    pro_result.append((ms_p, app_p))
+                    print("add new protocol: ", (ms_p, app_p))
+                if (ms_p, app_p) in pro_result:
+                    count_result[(ms_p, app_p)] += 1
+            else:
+                # mark the file-missing item
+                error_file.append(flow)
 
-    print("date ", sub_dir, ": payload data writing finished")
-    write_date_ndpi_to_csv(sub_dir, com_result)
-    print("date ", sub_dir, ": label writing finished")
-    print("\t total packet: ", packet_count, ", total bytes:", payload_length, "bytes")
-    print("\t total session counted: ", len(com_result))
-    print("\t total protocol counted: ", len(count_result))
-    print("\t ", count_result)
-    print("\t missing total ", len(error_file), " files:")
-    for err_info in error_file:
-        print("\t\t", err_info)
-    print("---------------------------------------------------------")
+        print("date ", sub_dir, ": payload data writing finished")
+        write_date_ndpi_to_csv(sub_dir, com_result)
+        print("date ", sub_dir, ": label writing finished")
+        print("\t total packet: ", packet_count, ", total bytes:", payload_length, "bytes")
+        print("\t total session counted: ", len(com_result))
+        print("\t total protocol counted: ", len(count_result))
+        print("\t ", count_result)
+        print("\t missing total ", len(error_file), " files:")
+        for err_info in error_file:
+            print("\t\t", err_info)
+        print("---------------------------------------------------------")
