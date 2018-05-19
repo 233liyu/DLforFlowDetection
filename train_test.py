@@ -7,7 +7,7 @@ import platform
 if platform.system() == "Darwin":
     data_set_root = '/Users/lee/Desktop/大四/毕业设计/GP_data'
 elif platform.system() == "Linux":
-    data_set_root = '/home/lee/Desktop/GP'
+    data_set_root = '/home/lee/Desktop/GP/linux'
 else:
     data_set_root = '$HOME'
 
@@ -73,15 +73,46 @@ if __name__ == '__main__':
     print("data reading finished, data:", len(train_feature))
 
     train = pd.merge(train_label, train_feature, on='file_id')
+    print('merge finished')
     labels = train.app_protocol
     train = train.drop(columns=['file_id', 'app_protocol'])
 
-    # print(train['packet'])
-    train = train['packet'].str.split('_', expand=True)
+    print(train['packet'])
 
-    train = train.applymap(lambda x: int(x, 16))
-    print(train)
+    # causing memory shortage
+    # train = train['packet'].str.split('_', expand=True)
 
-    print("writing to csv file")
-    train.to_csv(os.path.join(data_set_root, 'handled_train.csv'), sep=',')
+    print("labels write to file")
     labels.to_csv(os.path.join(data_set_root, 'handled_labels.csv'), sep=',')
+    labels = None
+    print("labels write to file finished")
+
+    print("train tmp save")
+    train.to_csv(os.path.join(data_set_root, 'tmp.csv'), sep=',', header=None)
+    print("train tmp save finished")
+
+    print("start to split and convert")
+
+    os.remove(os.path.join(data_set_root, 'handled_train.csv'))
+
+    data_size = len(train)
+    skip_rows = 0
+    while data_size > 0:
+        read_size = 10000
+        if data_size < read_size:
+            read_size = data_size
+        train = pd.read_csv(os.path.join(data_set_root, 'tmp.csv'),
+                            header=None,
+                            skiprows=skip_rows,
+                            nrows=read_size)
+        data_size -= read_size
+        skip_rows += read_size
+        print("read ", read_size, "rows, ", data_size, "rows left to read")
+        train = train[1].str.split('_', expand=True)
+        train = train.applymap(lambda x: int(x, 16))
+        print("writing into handled_train.csv")
+        with open(os.path.join(data_set_root, 'handled_train.csv'), 'a') as f:
+            train.to_csv(f, header=False)
+        print("---------------process finished----------------")
+
+    print('split finished')

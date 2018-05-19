@@ -13,15 +13,33 @@ import train_test
 import os
 import pandas as pd
 from sklearn.model_selection import train_test_split
+import numpy as np
+
+
+def label_map(label_input):
+    global label_mapping
+    label_mapping = label_input[1].value_counts(sort=True)
+    label_input = label_input[1].apply(lambda x: label_mapping.index.get_loc(x))
+
+    label_input = label_input.values
+    label_input = np.array(label_input).reshape(-1)
+    label_input = np.eye(len(label_mapping))[label_input]
+
+    return label_input
+
 
 train_set = pd.read_csv(os.path.join(train_test.data_set_root, 'handled_train.csv'),
-                        index_col=0, header=0)
-labels_set = pd.read_csv(os.path.join(train_test.data_set_root, 'handled_labels.csv'),
                         index_col=0, header=None)
+labels_set = pd.read_csv(os.path.join(train_test.data_set_root, 'handled_labels.csv'),
+                         index_col=0, header=None)
 
 train_set = train_set.values
+labels_set = label_map(labels_set)
 
-print(train_set)
+# print(train_set)
+print("training set size ", len(train_set))
+# print(labels_set)
+print(len(labels_set))
 
 X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
@@ -33,7 +51,7 @@ display_step = 10
 
 # Network Parameters
 num_input = 784  # MNIST data input (img shape: 28*28)
-num_classes = 10  # MNIST total classes (0-9 digits)
+num_classes = len(label_mapping)  # MNIST total classes (0-9 digits)
 dropout = 0.75  # Dropout, probability to keep units
 
 # tf Graph input
@@ -128,22 +146,25 @@ with tf.Session() as sess:
     sess.run(init)
 
     for step in range(1, num_steps + 1):
-        batch_x, batch_y = mnist.train.next_batch(batch_size)
-        # Run optimization op (backprop)
-        sess.run(train_op, feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.8})
-        if step % display_step == 0 or step == 1:
-            # Calculate batch loss and accuracy
-            loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
-                                                                 Y: batch_y,
-                                                                 keep_prob: 1.0})
-            print("Step " + str(step) + ", Minibatch Loss= " + \
-                  "{:.4f}".format(loss) + ", Training Accuracy= " + \
-                  "{:.3f}".format(acc))
+        for j in range(batch_size):
+            batch_x = X_train[batch_size * j:batch_size * (j + 1), :]
+            batch_y = y_train[batch_size * j:batch_size * (j + 1), :]
+            # Run optimization op (backprop)
+
+            sess.run(train_op, feed_dict={X: batch_x, Y: batch_y, keep_prob: 0.8})
+            if j == 0:
+                # Calculate batch loss and accuracy
+                loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
+                                                                     Y: batch_y,
+                                                                     keep_prob: 1.0})
+                print("Step " + str(step) + ", Minibatch Loss= " + \
+                      "{:.4f}".format(loss) + ", Training Accuracy= " + \
+                      "{:.3f}".format(acc))
 
     print("Optimization Finished!")
 
     # Calculate accuracy for 256 MNIST test images
     print("Testing Accuracy:",
-          sess.run(accuracy, feed_dict={X: mnist.test.images[:256],
-                                        Y: mnist.test.labels[:256],
+          sess.run(accuracy, feed_dict={X: X_test,
+                                        Y: y_test,
                                         keep_prob: 1.0}))

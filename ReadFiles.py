@@ -7,7 +7,7 @@ from collections import Counter
 if platform.system() == "Darwin":
     root_dir = '/Users/lee/Desktop/大四/毕业设计/GP_data'
 elif platform.system() == "Linux":
-    root_dir = '/home/lee/Desktop/GP'
+    root_dir = '/home/lee/Desktop/GP/linux'
 ndpi_label_filename = 'ndpi_result.txt'
 single_packet_length = 1568
 
