@@ -16,7 +16,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 
-
 def label_map(label_input):
     global label_mapping
     label_mapping = label_input[1].value_counts(sort=True)
@@ -40,20 +39,20 @@ labels_set = label_map(labels_set)
 
 # print(train_set)
 print("training set size ", len(train_set))
-print("class: ", len(labels_set))
+print("class: ", len(label_mapping))
 
 X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
 # Training Parameters
-learning_rate = 0.01
+learning_rate = 0.001
 num_steps = 200
-batch_size = 64
+batch_size = 128
 display_step = 10
 
 # Network Parameters
 num_input = 784  # MNIST data input (img shape: 28*28)
 num_classes = len(label_mapping)  # MNIST total classes (0-9 digits)
-dropout = 0.75  # Dropout, probability to keep units
+dropout = 0.5  # Dropout, probability to keep units
 
 # tf Graph input
 X = tf.placeholder(tf.float32, [None, num_input])
@@ -138,6 +137,9 @@ train_op = optimizer.minimize(loss_op)
 correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
+all_label_acc = tf.reduce_min(tf.cast(correct_pred, tf.float32))
+accuracy_label = tf.reduce_mean(all_label_acc)
+
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
@@ -169,4 +171,6 @@ with tf.Session() as sess:
           sess.run(accuracy, feed_dict={X: X_test,
                                         Y: y_test,
                                         keep_prob: 1.0}))
-
+    print(sess.run(accuracy_label, feed_dict={X: X_test,
+                                              Y: y_test,
+                                              keep_prob: 1.0}))

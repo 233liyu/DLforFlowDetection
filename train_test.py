@@ -130,13 +130,21 @@ if __name__ == '__main__':
             # data set is too small
             train = train[train.app_protocol != index]
             print("protocol ", index, " removed, size:", value)
-        elif value > 10000:
+        elif value > 5000:
             # too big
             temp = train.loc[train.app_protocol == index]
             train = train[train.app_protocol != index]
-            temp = temp.sample(10000)
+            temp = temp.sample(5000)
             print(temp)
             train = pd.concat([train, temp])
+
+    train = train[train.app_protocol != 'sslocal']
+    train = train[train.app_protocol != 'DNS']
+    # train = train[train.app_protocol != 'QUIC']
+    train = train[train.app_protocol != 'SSL']
+    train = train[train.app_protocol != 'BitTorrent']
+    # train = train[train.app_protocol != 'HTTP']
+    train = train[train.app_protocol != 'HTTP_Download']
 
     labels = train.app_protocol
     train = train.drop(columns=['file_id', 'app_protocol'])
