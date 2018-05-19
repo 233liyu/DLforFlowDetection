@@ -35,5 +35,6 @@ def to_full_str(x):
             b.append(x[n:n+2])
     return '_'.join(b)
 
-a = '12oihcds09a8yft023grb08hb0dsw8hrf'
-print(to_full_str(a))
+a = ',1,2,oihcds09,a8,yft023grb08hb0dsw8hrf,'
+# print(to_full_str(a))
+print([tok for tok in re.split(',', a) if len(tok) > 0])

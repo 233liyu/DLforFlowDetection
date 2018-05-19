@@ -1,6 +1,7 @@
 import os
 import csv
 import platform
+import re
 from collections import Counter
 
 # data set dir
@@ -37,7 +38,7 @@ def read_raw_data(file_name):
         for line in content:
             if read_type == 1:
                 # joint the payload as one str
-                payload += line.strip()
+                payload += "," + line.strip()
                 read_type = 0
                 continue
             if read_type == 2:
@@ -74,16 +75,24 @@ def read_ndpi_result(ndpi_file_name):
 
 def write_payload_to_csv(date_info, flow_name, payload):
     csv_file_name = os.path.join(root_dir, 'payload_info.csv')
-    pl = payload
+    pl = [tok for tok in re.split(',', payload) if len(tok) > 0]
+    # print(pl)
     data = []
     # cut the packet into single_packet_length
-    while True:
-        info_tuple = (str(date_info + ':' + flow_name), pl[:single_packet_length])
-        data.append(info_tuple)
-        if len(pl) < single_packet_length:
-            break
+    for pp in pl:
+        if len(pp) >= single_packet_length:
+            info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
         else:
-            pl = pl[single_packet_length:]
+            info_tuple = (str(date_info + ':' + flow_name), pp)
+        data.append(info_tuple)
+    # while True:
+    #
+    #     info_tuple = (str(date_info + ':' + flow_name), pl[:single_packet_length])
+    #     data.append(info_tuple)
+    #     if len(pl) < single_packet_length:
+    #         break
+    #     else:
+    #         pl = pl[single_packet_length:]
 
     with open(csv_file_name, "a") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
@@ -106,6 +115,7 @@ if __name__ == '__main__':
         file_dir = os.path.join(root_dir, sub_dir)
         ndpi_file = os.path.join(file_dir, ndpi_label_filename)
         ndpi_result = read_ndpi_result(ndpi_file)
+        print("ndpi_result read")
 
         error_file = []
         com_result = []

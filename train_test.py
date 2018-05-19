@@ -50,6 +50,42 @@ def read_data(data_file_list):
     return df
 
 
+def gra_write_split_hex2int(total_size, tmp_file_name, final_file_name):
+    skip_rows = 0
+    print("start to process "
+          "from, ", tmp_file_name,
+          " to ", final_file_name,
+          "total size: ", total_size)
+    print("remove final file: ", final_file_name)
+    try:
+        os.remove(os.path.join(data_set_root, final_file_name))
+    except IOError:
+        print("final not existed")
+    else:
+        print("removed")
+
+    while total_size > 0:
+        read_size = 10000
+        if total_size < read_size:
+            read_size = total_size
+        tr_set = pd.read_csv(os.path.join(data_set_root, tmp_file_name),
+                             header=None,
+                             skiprows=skip_rows,
+                             nrows=read_size)
+        total_size -= read_size
+        skip_rows += read_size
+        print("read ", read_size, "rows, ", total_size, "rows left to read")
+        tr_set = tr_set[1].str.split('_', expand=True)
+        tr_set = tr_set.applymap(lambda x: int(x, 16))
+        print("writing into ", final_file_name)
+        with open(os.path.join(data_set_root, final_file_name), 'a+') as f:
+            tr_set.to_csv(f, header=False)
+
+    print("remove tmp file: ", tmp_file_name)
+    os.remove(os.path.join(data_set_root, tmp_file_name))
+    print("---------------process finished----------------")
+
+
 if __name__ == '__main__':
     label_list = []
     raw_list = []
@@ -74,6 +110,34 @@ if __name__ == '__main__':
 
     train = pd.merge(train_label, train_feature, on='file_id')
     print('merge finished')
+
+    # cutting data set
+    label_count = train.app_protocol.value_counts(sort=True)
+    print(label_count)
+
+    # drop unknown set
+    print("process unknown protocol")
+    unknown_set = train.loc[train.app_protocol == 'Unknown']
+    train = train[train.app_protocol != 'Unknown']
+    unknown_set = unknown_set.drop(columns=['file_id', 'app_protocol'])
+    unknown_set.to_csv(os.path.join(data_set_root, 'tmp_unknown.csv'), sep=',', header=None)
+    gra_write_split_hex2int(len(unknown_set), 'tmp_unknown.csv', 'handled_unknown.csv')
+    print("unknown set dropped, and saved to handled_unknown.csv")
+
+    label_count = label_count[label_count.index != 'Unknown']
+    for index, value in label_count.iteritems():
+        if value < 1000:
+            # data set is too small
+            train = train[train.app_protocol != index]
+            print("protocol ", index, " removed, size:", value)
+        elif value > 10000:
+            # too big
+            temp = train.loc[train.app_protocol == index]
+            train = train[train.app_protocol != index]
+            temp = temp.sample(10000)
+            print(temp)
+            train = pd.concat([train, temp])
+
     labels = train.app_protocol
     train = train.drop(columns=['file_id', 'app_protocol'])
 
@@ -92,27 +156,5 @@ if __name__ == '__main__':
     print("train tmp save finished")
 
     print("start to split and convert")
-
-    os.remove(os.path.join(data_set_root, 'handled_train.csv'))
-
-    data_size = len(train)
-    skip_rows = 0
-    while data_size > 0:
-        read_size = 10000
-        if data_size < read_size:
-            read_size = data_size
-        train = pd.read_csv(os.path.join(data_set_root, 'tmp.csv'),
-                            header=None,
-                            skiprows=skip_rows,
-                            nrows=read_size)
-        data_size -= read_size
-        skip_rows += read_size
-        print("read ", read_size, "rows, ", data_size, "rows left to read")
-        train = train[1].str.split('_', expand=True)
-        train = train.applymap(lambda x: int(x, 16))
-        print("writing into handled_train.csv")
-        with open(os.path.join(data_set_root, 'handled_train.csv'), 'a') as f:
-            train.to_csv(f, header=False)
-        print("---------------process finished----------------")
-
+    gra_write_split_hex2int(len(train), 'tmp.csv', 'handled_train.csv')
     print('split finished')

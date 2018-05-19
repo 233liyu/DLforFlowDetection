@@ -16,9 +16,11 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 
+
 def label_map(label_input):
     global label_mapping
     label_mapping = label_input[1].value_counts(sort=True)
+    print(label_mapping)
     label_input = label_input[1].apply(lambda x: label_mapping.index.get_loc(x))
 
     label_input = label_input.values
@@ -38,15 +40,14 @@ labels_set = label_map(labels_set)
 
 # print(train_set)
 print("training set size ", len(train_set))
-# print(labels_set)
-print(len(labels_set))
+print("class: ", len(labels_set))
 
 X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
 # Training Parameters
-learning_rate = 0.001
+learning_rate = 0.01
 num_steps = 200
-batch_size = 128
+batch_size = 64
 display_step = 10
 
 # Network Parameters
@@ -168,3 +169,4 @@ with tf.Session() as sess:
           sess.run(accuracy, feed_dict={X: X_test,
                                         Y: y_test,
                                         keep_prob: 1.0}))
+
