@@ -115,36 +115,36 @@ if __name__ == '__main__':
     label_count = train.app_protocol.value_counts(sort=True)
     print(label_count)
 
-    # drop unknown set
-    print("process unknown protocol")
-    unknown_set = train.loc[train.app_protocol == 'Unknown']
-    train = train[train.app_protocol != 'Unknown']
-    unknown_set = unknown_set.drop(columns=['file_id', 'app_protocol'])
-    unknown_set.to_csv(os.path.join(data_set_root, 'tmp_unknown.csv'), sep=',', header=None)
-    gra_write_split_hex2int(len(unknown_set), 'tmp_unknown.csv', 'handled_unknown.csv')
-    print("unknown set dropped, and saved to handled_unknown.csv")
+    # # drop unknown set
+    # print("process unknown protocol")
+    # unknown_set = train.loc[train.app_protocol == 'Unknown']
+    # train = train[train.app_protocol != 'Unknown']
+    # unknown_set = unknown_set.drop(columns=['file_id', 'app_protocol'])
+    # unknown_set.to_csv(os.path.join(data_set_root, 'tmp_unknown.csv'), sep=',', header=None)
+    # gra_write_split_hex2int(len(unknown_set), 'tmp_unknown.csv', 'handled_unknown.csv')
+    # print("unknown set dropped, and saved to handled_unknown.csv")
+    #
+    # label_count = label_count[label_count.index != 'Unknown']
+    # for index, value in label_count.iteritems():
+    #     if value < 1000:
+    #         # data set is too small
+    #         train = train[train.app_protocol != index]
+    #         print("protocol ", index, " removed, size:", value)
+    #     elif value > 5000:
+    #         # too big
+    #         temp = train.loc[train.app_protocol == index]
+    #         train = train[train.app_protocol != index]
+    #         temp = temp.sample(5000)
+    #         print(temp)
+    #         train = pd.concat([train, temp])
 
-    label_count = label_count[label_count.index != 'Unknown']
-    for index, value in label_count.iteritems():
-        if value < 1000:
-            # data set is too small
-            train = train[train.app_protocol != index]
-            print("protocol ", index, " removed, size:", value)
-        elif value > 5000:
-            # too big
-            temp = train.loc[train.app_protocol == index]
-            train = train[train.app_protocol != index]
-            temp = temp.sample(5000)
-            print(temp)
-            train = pd.concat([train, temp])
-
-    train = train[train.app_protocol != 'sslocal']
-    train = train[train.app_protocol != 'DNS']
+    # train = train[train.app_protocol != 'sslocal']
+    # train = train[train.app_protocol != 'DNS']
     # train = train[train.app_protocol != 'QUIC']
-    train = train[train.app_protocol != 'SSL']
-    train = train[train.app_protocol != 'BitTorrent']
+    # train = train[train.app_protocol != 'SSL']
+    # train = train[train.app_protocol != 'BitTorrent']
     # train = train[train.app_protocol != 'HTTP']
-    train = train[train.app_protocol != 'HTTP_Download']
+    # train = train[train.app_protocol != 'HTTP_Download']
 
     labels = train.app_protocol
     train = train.drop(columns=['file_id', 'app_protocol'])

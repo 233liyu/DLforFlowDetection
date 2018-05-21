@@ -41,11 +41,13 @@ labels_set = label_map(labels_set)
 print("training set size ", len(train_set))
 print("class: ", len(label_mapping))
 
+train_set = train_set / 255
+
 X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
 # Training Parameters
 learning_rate = 0.001
-num_steps = 200
+num_steps = 50
 batch_size = 128
 display_step = 10
 
@@ -137,9 +139,6 @@ train_op = optimizer.minimize(loss_op)
 correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
-all_label_acc = tf.reduce_min(tf.cast(correct_pred, tf.float32))
-accuracy_label = tf.reduce_mean(all_label_acc)
-
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
@@ -159,8 +158,8 @@ with tf.Session() as sess:
                 # Calculate batch loss and accuracy
                 loss, acc = sess.run([loss_op, accuracy], feed_dict={X: batch_x,
                                                                      Y: batch_y,
-                                                                     keep_prob: 1.0})
-                print("Step " + str(step) + ", Minibatch Loss= " + \
+                                                                    keep_prob: 1.0})
+                print("Step  " + str(step) + ", Minibatch Loss= " + \
                       "{:.4f}".format(loss) + ", Training Accuracy= " + \
                       "{:.3f}".format(acc))
 
@@ -171,6 +170,3 @@ with tf.Session() as sess:
           sess.run(accuracy, feed_dict={X: X_test,
                                         Y: y_test,
                                         keep_prob: 1.0}))
-    print(sess.run(accuracy_label, feed_dict={X: X_test,
-                                              Y: y_test,
-                                              keep_prob: 1.0}))
