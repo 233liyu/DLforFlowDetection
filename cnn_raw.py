@@ -43,18 +43,18 @@ print("class: ", len(label_mapping))
 
 train_set = train_set / 255
 
-X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
+X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.2)
 
 # Training Parameters
 learning_rate = 0.001
 num_steps = 50
-batch_size = 128
+batch_size = 64
 display_step = 10
 
 # Network Parameters
 num_input = 784  # MNIST data input (img shape: 28*28)
 num_classes = len(label_mapping)  # MNIST total classes (0-9 digits)
-dropout = 0.5  # Dropout, probability to keep units
+dropout = 0.9  # Dropout, probability to keep units
 
 # tf Graph input
 X = tf.placeholder(tf.float32, [None, num_input])
@@ -81,7 +81,7 @@ def conv_net(x, weights, biases, dropout):
     # MNIST data input is a 1-D vector of 784 features (28*28 pixels)
     # Reshape to match picture format [Height x Width x Channel]
     # Tensor input become 4-D: [Batch Size, Height, Width, Channel]
-    x = tf.reshape(x, shape=[-1, 28, 28, 1])
+    x = tf.reshape(x, shape=[-1, 196, 4, 1])
 
     # Convolution Layer
     conv1 = conv2d(x, weights['wc1'], biases['bc1'])
@@ -109,9 +109,9 @@ def conv_net(x, weights, biases, dropout):
 # Store layers weight & bias
 weights = {
     # 5x5 conv, 1 input, 32 outputs
-    'wc1': tf.Variable(tf.random_normal([5, 5, 1, 32])),
+    'wc1': tf.Variable(tf.random_normal([3, 3, 1, 128])),
     # 5x5 conv, 32 inputs, 64 outputs
-    'wc2': tf.Variable(tf.random_normal([5, 5, 32, 64])),
+    'wc2': tf.Variable(tf.random_normal([3, 3, 128, 64])),
     # fully connected, 7*7*64 inputs, 1024 outputs
     'wd1': tf.Variable(tf.random_normal([7 * 7 * 64, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
@@ -119,7 +119,7 @@ weights = {
 }
 
 biases = {
-    'bc1': tf.Variable(tf.random_normal([32])),
+    'bc1': tf.Variable(tf.random_normal([128])),
     'bc2': tf.Variable(tf.random_normal([64])),
     'bd1': tf.Variable(tf.random_normal([1024])),
     'out': tf.Variable(tf.random_normal([num_classes]))

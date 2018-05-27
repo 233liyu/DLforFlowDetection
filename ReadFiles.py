@@ -21,7 +21,7 @@ def sub_dir_list():
 
 
 # read from the raw data file and return a joint payload
-# @return: [return payload, payload_length, process, success]\
+# @return: [return payload, payload_length, process, success]
 def read_raw_data(file_name):
     payload = ""
     process = "NULL"
@@ -38,7 +38,7 @@ def read_raw_data(file_name):
         for line in content:
             if read_type == 1:
                 # joint the payload as one str
-                payload += line.strip()
+                payload += ',' + line.strip()
                 read_type = 0
                 continue
             if read_type == 2:
@@ -73,31 +73,76 @@ def read_ndpi_result(ndpi_file_name):
     return container
 
 
-def write_payload_to_csv(date_info, flow_name, payload):
+def write_payload_to_csv(date_info, flow_name, payload, payload_count):
     csv_file_name = os.path.join(root_dir, 'payload_info.csv')
-    # pl = [tok for tok in re.split(',', payload) if len(tok) > 0]
+    pl = [tok for tok in re.split(',', payload) if len(tok) > 0]
     # print(pl)
     data = []
     # cut the packet into single_packet_length
     # for pp in pl:
+    #     # get the distribution to the payload length
+    #     lene = len(pp)
+    #     lene = int(lene / 10)
+    #     payload_count[lene] += 1
+    #
     #     if len(pp) >= single_packet_length:
     #         info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
     #     else:
     #         info_tuple = (str(date_info + ':' + flow_name), pp)
     #     data.append(info_tuple)
-    pl = payload
-    while True:
-        info_tuple = (str(date_info + ':' + flow_name), pl[:single_packet_length])
-        data.append(info_tuple)
-        if len(pl) < single_packet_length:
-            break
+
+    # for i in range(len(pl)):
+    #     pp = pl[i]
+    #     lene = len(pp)
+    #     lene = int(lene / 10)
+    #     payload_count[lene] += 1
+    #     if len(pp) >= single_packet_length:
+    #         info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+    #     else:
+    #         j = i + 1
+    #         while j < len(pl):
+    #             pp += pl[j]
+    #             if len(pp) >= single_packet_length:
+    #                 info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+    #                 break
+    #             j += 1
+    #
+    #         if len(pp) < single_packet_length:
+    #             # rate = float(len(pp) / single_packet_length)
+    #             # if rate > 0.95:
+    #             info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+    #             # else:
+    #             #     continue
+    #
+    #     data.append(info_tuple)
+
+    for pp in pl:
+        # get the distribution to the payload length
+        lene = len(pp)
+        lene = int(lene / 10)
+        payload_count[lene] += 1
+
+        if len(pp) >= single_packet_length:
+            info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
         else:
-            pl = pl[single_packet_length:]
+            continue
+        data.append(info_tuple)
+
+
+    # pl = payload
+    # while True:
+    #     info_tuple = (str(date_info + ':' + flow_name), pl[:single_packet_length])
+    #     data.append(info_tuple)
+    #     if len(pl) < single_packet_length:
+    #         break
+    #     else:
+    #         pl = pl[single_packet_length:]
 
     with open(csv_file_name, "a") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
         for info in data:
             writer.writerow(info)
+    return payload_count
 
 
 def write_date_ndpi_to_csv(date, ndpi_result_list):
@@ -121,13 +166,14 @@ if __name__ == '__main__':
         com_result = []
         pro_result = []
         count_result = Counter()
+        packet_length_counter = Counter()
 
         payload_length = 0
         packet_count = 0
         for flow, ms_p, app_p in ndpi_result:
             loads, process_name, count, result = read_raw_data(os.path.join(file_dir, flow))
             if result:
-                write_payload_to_csv(sub_dir, flow, loads)
+                packet_length_counter = write_payload_to_csv(sub_dir, flow, loads, packet_length_counter)
                 payload_length += len(loads)
                 packet_count += count
                 com_result.append((flow, ms_p, app_p, process_name))
@@ -148,7 +194,14 @@ if __name__ == '__main__':
         print("\t total session counted: ", len(com_result))
         print("\t total protocol counted: ", len(count_result))
         print("\t ", count_result)
+        print("\t packet length distribute: ", packet_length_counter)
         print("\t missing total ", len(error_file), " files:")
-        for err_info in error_file:
-            print("\t\t", err_info)
+
+        # with open(os.path.join(root_dir, 'length_dis.csv'), 'w') as csvfile:
+        #     writer = csv.writer(csvfile)
+        #     for key, value in packet_length_counter.items():
+        #         writer.writerow(list(key) + [value])
+
+        # for err_info in error_file:
+        #     print("\t\t", err_info)
         print("---------------------------------------------------------")
