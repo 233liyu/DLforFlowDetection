@@ -48,13 +48,13 @@ X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_
 # Training Parameters
 learning_rate = 0.001
 num_steps = 50
-batch_size = 64
+batch_size = 128
 display_step = 10
 
 # Network Parameters
 num_input = 784  # MNIST data input (img shape: 28*28)
 num_classes = len(label_mapping)  # MNIST total classes (0-9 digits)
-dropout = 0.9  # Dropout, probability to keep units
+dropout = 0.5  # Dropout, probability to keep units
 
 # tf Graph input
 X = tf.placeholder(tf.float32, [None, num_input])

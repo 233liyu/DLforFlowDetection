@@ -131,16 +131,16 @@ if __name__ == '__main__':
             # data set is too small
             train = train[train.app_protocol != index]
             print("protocol ", index, " removed, size:", value)
-        elif value > 2000:
+        elif value > 5000:
             # too big
             temp = train.loc[train.app_protocol == index]
             train = train[train.app_protocol != index]
-            temp = temp.sample(2000)
+            temp = temp.sample(5000)
             print(temp)
             train = pd.concat([train, temp])
 
     train = train[train.app_protocol != 'sslocal']
-    # train = train[train.app_protocol != 'DNS']
+    train = train[train.app_protocol != 'DNS']
     train = train[train.app_protocol != 'QUIC']
     # train = train[train.app_protocol != 'SSL']
     train = train[train.app_protocol != 'BitTorrent']

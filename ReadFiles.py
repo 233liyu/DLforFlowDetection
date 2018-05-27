@@ -91,47 +91,48 @@ def write_payload_to_csv(date_info, flow_name, payload, payload_count):
     #         info_tuple = (str(date_info + ':' + flow_name), pp)
     #     data.append(info_tuple)
 
-    # for i in range(len(pl)):
-    #     pp = pl[i]
-    #     lene = len(pp)
-    #     lene = int(lene / 10)
-    #     payload_count[lene] += 1
-    #     if len(pp) >= single_packet_length:
-    #         info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
-    #     else:
-    #         j = i + 1
-    #         while j < len(pl):
-    #             pp += pl[j]
-    #             if len(pp) >= single_packet_length:
-    #                 info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
-    #                 break
-    #             j += 1
-    #
-    #         if len(pp) < single_packet_length:
-    #             # rate = float(len(pp) / single_packet_length)
-    #             # if rate > 0.95:
-    #             info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
-    #             # else:
-    #             #     continue
-    #
-    #     data.append(info_tuple)
-
-    for pp in pl:
-        # get the distribution to the payload length
+    for i in range(len(pl)):
+        pp = pl[i]
         lene = len(pp)
         lene = int(lene / 10)
         payload_count[lene] += 1
-
         if len(pp) >= single_packet_length:
             info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
         else:
-            continue
+            j = i + 1
+            while j < len(pl):
+                pp += pl[j]
+                if len(pp) >= single_packet_length:
+                    info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+                    break
+                j += 1
+
+            if len(pp) < single_packet_length:
+                # rate = float(len(pp) / single_packet_length)
+                # if rate > 0.95:
+                info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+                # else:
+                #     continue
+
         data.append(info_tuple)
 
+    # for pp in pl:
+    #     # get the distribution to the payload length
+    #     # give up the short version
+    #     lene = len(pp)
+    #     lene = int(lene / 10)
+    #     payload_count[lene] += 1
+    #
+    #     if len(pp) >= single_packet_length:
+    #         info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
+    #     else:
+    #         continue
+    #     data.append(info_tuple)
 
-    # pl = payload
+    # just concat
+    # pp = payload.replace(',', '')
     # while True:
-    #     info_tuple = (str(date_info + ':' + flow_name), pl[:single_packet_length])
+    #     info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
     #     data.append(info_tuple)
     #     if len(pl) < single_packet_length:
     #         break
