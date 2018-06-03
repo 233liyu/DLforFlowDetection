@@ -12,6 +12,9 @@ else:
     data_set_root = '$HOME'
 
 
+sample_size = 3000
+
+
 def read_label(result_file_list):
     df = pd.DataFrame({}, columns=['file_id', 'ms_protocol', 'app_protocol', 'process'])
     for file_name in result_file_list:
@@ -131,18 +134,18 @@ if __name__ == '__main__':
             # data set is too small
             train = train[train.app_protocol != index]
             print("protocol ", index, " removed, size:", value)
-        elif value > 5000:
+        elif value > sample_size:
             # too big
             temp = train.loc[train.app_protocol == index]
             train = train[train.app_protocol != index]
-            temp = temp.sample(5000)
+            temp = temp.sample(sample_size)
             print(temp)
             train = pd.concat([train, temp])
 
-    train = train[train.app_protocol != 'sslocal']
+    # train = train[train.app_protocol != 'sslocal']
     train = train[train.app_protocol != 'DNS']
     train = train[train.app_protocol != 'QUIC']
-    # train = train[train.app_protocol != 'SSL']
+    train = train[train.app_protocol != 'SSL']
     train = train[train.app_protocol != 'BitTorrent']
     # train = train[train.app_protocol != 'HTTP']
     train = train[train.app_protocol != 'HTTP_Download']

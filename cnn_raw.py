@@ -12,6 +12,7 @@ import tensorflow as tf
 import train_test
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -48,7 +49,7 @@ X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_
 # Training Parameters
 learning_rate = 0.001
 num_steps = 50
-batch_size = 128
+batch_size = 64
 display_step = 10
 
 # Network Parameters
@@ -93,6 +94,11 @@ def conv_net(x, weights, biases, dropout):
     # Max Pooling (down-sampling)
     conv2 = maxpool2d(conv2, k=2)
 
+    # # Convolution Layer
+    # conv3 = conv2d(conv2, weights['wc3'], biases['bc3'])
+    # # Max Pooling (down-sampling)
+    # conv3 = maxpool2d(conv3, k=2)
+
     # Fully connected layer
     # Reshape conv2 output to fit fully connected layer input
     fc1 = tf.reshape(conv2, [-1, weights['wd1'].get_shape().as_list()[0]])
@@ -112,6 +118,7 @@ weights = {
     'wc1': tf.Variable(tf.random_normal([3, 3, 1, 128])),
     # 5x5 conv, 32 inputs, 64 outputs
     'wc2': tf.Variable(tf.random_normal([3, 3, 128, 64])),
+
     # fully connected, 7*7*64 inputs, 1024 outputs
     'wd1': tf.Variable(tf.random_normal([7 * 7 * 64, 1024])),
     # 1024 inputs, 10 outputs (class prediction)
@@ -142,6 +149,9 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 # Initialize the variables (i.e. assign their default value)
 init = tf.global_variables_initializer()
 
+testing_accuracy_list = []
+loss_list = []
+training_accuracy_list = []
 # Start training
 with tf.Session() as sess:
     # Run the initializer
@@ -162,6 +172,13 @@ with tf.Session() as sess:
                 print("Step  " + str(step) + ", Minibatch Loss= " + \
                       "{:.4f}".format(loss) + ", Training Accuracy= " + \
                       "{:.3f}".format(acc))
+                test_acc = sess.run(accuracy, feed_dict={X: X_test,
+                                                    Y: y_test,
+                                                    keep_prob: 1.0})
+                print("Testing Accuracy:", test_acc)
+                testing_accuracy_list.append(test_acc)
+                loss_list.append(loss)
+                training_accuracy_list.append(acc)
 
     print("Optimization Finished!")
 
@@ -170,3 +187,14 @@ with tf.Session() as sess:
           sess.run(accuracy, feed_dict={X: X_test,
                                         Y: y_test,
                                         keep_prob: 1.0}))
+# Plot the losses during training.
+plt.figure()
+plt.title("CNN")
+plt.plot(testing_accuracy_list, "b-o", linewidth=2, markersize=3)
+plt.plot(training_accuracy_list, "r--", linewidth=2, markersize=3)
+# plt.plot(loss_list, "b-o", linewidth=2, markersize=3)
+plt.grid(True)
+plt.xlabel("Iteration*10")
+# plt.ylabel("LOSS")
+plt.ylabel("Test and training accuracy")
+plt.show()

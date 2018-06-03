@@ -34,8 +34,8 @@ train_set = train_set / 255
 X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_size=0.4)
 
 learning_rate = 0.001
-training_epochs = 500
-batch_size = 256
+training_epochs = 2000
+batch_size = 128
 display_step = 10
 n_input = 784
 X = tf.placeholder("float", [None, n_input])

@@ -44,7 +44,7 @@ X_train, X_test, y_train, y_test = train_test_split(train_set, labels_set, test_
 
 # Parameters
 learning_rate = 0.001
-num_steps = 5000
+num_steps = 2000
 batch_size = 128
 # display_step = 10
 

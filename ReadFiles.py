@@ -78,7 +78,7 @@ def write_payload_to_csv(date_info, flow_name, payload, payload_count):
     pl = [tok for tok in re.split(',', payload) if len(tok) > 0]
     # print(pl)
     data = []
-    # cut the packet into single_packet_length
+    # # cut the packet into single_packet_length
     # for pp in pl:
     #     # get the distribution to the payload length
     #     lene = len(pp)
@@ -108,37 +108,21 @@ def write_payload_to_csv(date_info, flow_name, payload, payload_count):
                 j += 1
 
             if len(pp) < single_packet_length:
-                # rate = float(len(pp) / single_packet_length)
-                # if rate > 0.95:
                 info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
-                # else:
-                #     continue
 
         data.append(info_tuple)
 
-    # for pp in pl:
-    #     # get the distribution to the payload length
-    #     # give up the short version
-    #     lene = len(pp)
-    #     lene = int(lene / 10)
-    #     payload_count[lene] += 1
-    #
-    #     if len(pp) >= single_packet_length:
-    #         info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
-    #     else:
-    #         continue
-    #     data.append(info_tuple)
 
-    # just concat
+    # # just concat
     # pp = payload.replace(',', '')
     # while True:
     #     info_tuple = (str(date_info + ':' + flow_name), pp[:single_packet_length])
     #     data.append(info_tuple)
-    #     if len(pl) < single_packet_length:
+    #     if len(pp) < single_packet_length:
     #         break
     #     else:
-    #         pl = pl[single_packet_length:]
-
+    #         pp = pp[single_packet_length:]
+    #
     with open(csv_file_name, "a") as csv_file:
         writer = csv.writer(csv_file, delimiter=',')
         for info in data:
